@@ -69,7 +69,7 @@ jobs:
           sudo mv argocd-linux-amd64 /usr/local/bin/argocd
       - name: Deploy to ArgoCD
         run: |
-          echo ${{ secrets.ARGOCD_AUTH }} | argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token --insecure --grpc-web
+          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH }} --insecure --grpc-web
           argocd account get-user-info
           argocd app set $PROJECT_NAME --helm-set image.tag=$NEW_TAG
           argocd app sync $PROJECT_NAME
