@@ -71,6 +71,8 @@ jobs:
         run: |
           argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
           argocd account get-user-info
+          argocd app set $PROJECT_NAME:$NEW_TAG
+          argocd app sync $PROJECT_NAME:$NEW_TAG
 
         env:
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
