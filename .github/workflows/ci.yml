@@ -69,5 +69,5 @@ jobs:
           sudo mv argocd-linux-amd64 /usr/local/bin/argocd
       - name: Deploy to ArgoCD
         run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --username admin --password k0ZZVrG7V0cziIQV  --insecure && \
-          argocd app set myprojects --parameter image.tag=v1.0.6
+          (argocd login ${{ secrets.ARGOCD_SERVER }} --username admin --password k0ZZVrG7V0cziIQV  --insecure && \
+          argocd app set myprojects --parameter image.tag=v1.0.6)
