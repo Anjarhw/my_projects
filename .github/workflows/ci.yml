@@ -3,7 +3,7 @@ name: CI Pipeline
 on:
   push:
     tags:
-      - "v*"  # Triggers when a tag like "v1.0", "v2.3" is pushed
+      - "v*"  # Triggers when a tag like "v1.0", "v2.3" is pushedd
 
 env:
   PROJECT_NAME: ${{ vars.PROJECT_NAME }}
