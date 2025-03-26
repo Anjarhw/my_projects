@@ -49,8 +49,7 @@ jobs:
         run: |
           PROJECT_NAME="ghcr.io/${{ github.repository_owner }}/myprojects"
           PROJECT_NAME=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
-
-          docker build -t $PROJECT_NAME:$NEW_TAG .
+          docker build -t $PROJECT_NAME:$NEW_TAG -f docker/Dockerfile .
           docker push $PROJECT_NAME:$NEW_TAG
  
   deploy:
