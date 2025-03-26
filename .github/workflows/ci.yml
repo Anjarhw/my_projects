@@ -61,6 +61,11 @@ jobs:
         run: |
           NEW_TAG=$(echo "${{ github.ref_name }}" | tr '[:upper:]' '[:lower:]')
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+      - name: Install ArgoCD CLI  # ✅ Add this step
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd-linux-amd64
+          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
       - name: Deploy to ArgoCD
         run: |
           argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
