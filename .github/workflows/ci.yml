@@ -6,9 +6,7 @@ on:
       - "v*"  # Triggers when a tag like "v1.0", "v2.3" is pushedd
 
 env:
-  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
   REGISTRY: ghcr.io/${{ secrets.REGISTRY_USERNAME }}
-
 
 jobs:
   build-and-test:
@@ -49,8 +47,11 @@ jobs:
 
       - name: Build and push Docker Image
         run: |
-          docker build -t ghcr.io/${{ secrets.REGISTRY_USERNAME }}/$PROJECT_NAME:$NEW_TAG .
-          docker push ghcr.io/${{ secrets.REGISTRY_USERNAME }}/$PROJECT_NAME:$NEW_TAG
+          PROJECT_NAME="ghcr.io/${{ github.repository_owner }}/myprojects"
+          PROJECT_NAME=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
+
+          docker build -t $PROJECT_NAME:$NEW_TAG .
+          docker push $PROJECT_NAME:$NEW_TAG
  
   deploy:
     runs-on: ubuntu-latest
