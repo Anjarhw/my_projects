@@ -2,14 +2,16 @@ name: CI Pipeline
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - "v*"  # Triggers when a tag like "v1.0", "v2.3" is pushed
+
+env:
+  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+  REGISTRY: ghcr.io/${{ secrets.REGISTRY_USERNAME }}
+
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -18,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 23
+          node-version: 20
 
       - name: Install Dependencies
         run: npm install
@@ -28,3 +30,47 @@ jobs:
           nohup npm run start &
           sleep 5
           curl -f http://localhost:3200
+
+  build-and-push-docker:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Get Latest Tag
+        id: get_version
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          NEW_TAG=$(echo $LATEST_TAG | awk -F. -v OFS=. '{$NF += 1 ; print}')
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+          
+      - name: Log in to GitHub Container Registry (GHCR)
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ghcr.io -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+      - name: Build and push Docker Image
+        run: |
+          docker build -t ghcr.io/${{ secrets.REGISTRY_USERNAME }}/$PROJECT_NAME:$NEW_TAG .
+          docker push ghcr.io/${{ secrets.REGISTRY_USERNAME }}/$PROJECT_NAME:$NEW_TAG
+ 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push-docker
+    steps:
+      - name: Get Latest Tag
+        id: get_version
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          NEW_TAG=$(echo $LATEST_TAG | awk -F. -v OFS=. '{$NF += 1 ; print}')
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+      - name: Deploy to ArgoCD
+        run: |
+          argocd login $ARGOCD_SERVER --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD --insecure
+          argocd app set $PROJECT_NAME --parameter image.tag=$NEW_TAG
+          argocd app sync $PROJECT_NAME
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
+          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
