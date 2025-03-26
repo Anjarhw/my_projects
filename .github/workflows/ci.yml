@@ -70,4 +70,4 @@ jobs:
       - name: Deploy to ArgoCD
         run: |
           argocd login ${{ secrets.ARGOCD_SERVER }} --username admin --password k0ZZVrG7V0cziIQV  --insecure
-          
+          argocd app set myprojects --helm-set image.tag=v1.0.6
