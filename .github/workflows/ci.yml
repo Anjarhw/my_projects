@@ -6,6 +6,7 @@ on:
       - "v*"  # Triggers when a tag like "v1.0", "v2.3" is pushedd
 
 env:
+  PROJECT_NAME:${{ vars.PROJECT_NAME }}
   REGISTRY: ghcr.io/${{ secrets.REGISTRY_USERNAME }}
   
 jobs:
@@ -69,8 +70,9 @@ jobs:
       - name: Deploy to ArgoCD
         run: |
           argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
-          argocd app set $PROJECT_NAME --parameter image.tag=$NEW_TAG
+          argocd app set $PROJECT_NAME --helm-set image.tag=$NEW_TAG
           argocd app sync $PROJECT_NAME
+          argocd app logs $PROJECT_NAME
         env:
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
           ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
