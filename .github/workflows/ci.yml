@@ -6,7 +6,7 @@ on:
       - "v*"  # Triggers when a tag like "v1.0", "v2.3" is pushedd
 
 env:
-  PROJECT_NAME:${{ vars.PROJECT_NAME }}
+  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
   REGISTRY: ghcr.io/${{ secrets.REGISTRY_USERNAME }}
   
 jobs:
