@@ -41,9 +41,7 @@ jobs:
       - name: Get Latest Tag
         id: get_version
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
-          echo "Latest tag: $LATEST_TAG"
-          NEW_TAG=$(echo $LATEST_TAG | awk -F. -v OFS=. '{$NF += 1 ; print}')
+          NEW_TAG=$(echo "${{ github.ref_name }}" | tr '[:upper:]' '[:lower:]')
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
           
       - name: Log in to GitHub Container Registry (GHCR)
@@ -61,9 +59,7 @@ jobs:
       - name: Get Latest Tag
         id: get_version
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
-          echo "Latest tag: $LATEST_TAG"
-          NEW_TAG=$(echo $LATEST_TAG | awk -F. -v OFS=. '{$NF += 1 ; print}')
+          NEW_TAG=$(echo "${{ github.ref_name }}" | tr '[:upper:]' '[:lower:]')
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
       - name: Deploy to ArgoCD
         run: |
